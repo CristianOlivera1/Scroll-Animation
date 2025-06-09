@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Animación de Scroll</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <style>
+        body {
+            height: 200vh; 
+            background: linear-gradient(to right, #155dfc, #2b5d9c, #2b7fff);
+            font-family: Arial, sans-serif;
+        }
+    h1 {
+        mask-image: radial-gradient(circle, rgba(0,0,0,1) 65%, rgba(0,0,0,0) 100%);
+        }
+
+    </style>
+    </head>
+    <body class="relative min-h-[200vh]">
+        <h1 class="title fixed z-10 text-white text-center w-[90vw] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold drop-shadow-lg pointer-events-none select-none">
+            Universidad Nacional Micaela Bastidas de Apurímac - Foro
+            Universitario
+        </h1>
+        <div
+            class="fixed inset-0 flex items-center justify-center z-0 pointer-events-none">
+            <canvas
+                class="hero w-[200vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] xl:w-[100vw] max-w-[1068px] aspect-[1068/600] h-auto"></canvas>
+        </div>
+        <script
+            src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+
+        <script>
+            
+        gsap.registerPlugin(ScrollTrigger);
+
+        //animacion de entrada
+    gsap.from(".title", {
+        y: 80,
+        duration: 1,
+        ease: "power2.out"
+    });
+
+    //animacion de scroll letras
+    gsap.to(".title", {
+        scale: 1.5,    
+        autoAlpha: 0,  
+        scrollTrigger: {
+            start: 100,
+            end: 300,
+            scrub: 0.5      
+        }
+    });
+
+    gsap.from(".hero", {
+        scale: 0.95,
+        autoAlpha: 0,
+        duration: 1.2,
+        ease: "power2.out",
+        delay: 0.2
+    });
+        const canvas = document.querySelector(".hero");
+        const ctx = canvas.getContext("2d");
+        canvas.width = 1068;
+        canvas.height = 600;
+
+        const TOTAL_FRAMES=34;
+
+        const createImage = (index) => {
+            return `/framewebp/scene${index.toString().padStart(5, 0)}.webp`;
+        };
+        const images = Array.from({ length: TOTAL_FRAMES }, (_, i) => {
+            const img = new Image();
+            img.src = createImage(i + 1); 
+            return img;
+        });
+        const micaela = {
+         frame:0
+        }; 
+
+        //animacion de scroll imagen
+        gsap.to(micaela, {
+            frame: TOTAL_FRAMES-1,
+            ease: "none",
+            snap: "frame",
+            scrollTrigger: {
+                scrub: 0.5,
+            },
+            onUpdate:render
+      
+        });
+
+    images[0].onload = () =>  render();
+    function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const img = images[micaela.frame];
+    if (img && img.complete) {
+        ctx.save();
+     ctx.filter = 'drop-shadow(0px 2px 10px rgba(0, 0, 0, 0.1))';
+        ctx.drawImage(img, 0, 0);
+
+        // Crear gradiente de máscara de arriba (20%) a abajo (80%)
+        const gradient = ctx.createLinearGradient(0, canvas.height * 1, 0, canvas.height * 0.6);
+        gradient.addColorStop(0, 'rgba(0,0,0,0)');
+        gradient.addColorStop(1, 'rgba(0,0,0,1)');
+
+        ctx.globalCompositeOperation = 'destination-in';
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.restore();
+        ctx.globalCompositeOperation = 'source-over';
+    }
+}
+    </script>
+    </body>
+</html>
