@@ -1,4 +1,5 @@
 # Animación de manejo de Scroll
 
 Animaciones al hacer scroll en una página web.
-![Animation3 (1)](https://github.com/user-attachments/assets/08955abf-dde5-4208-a6c9-bd4eb93a762a)
+
+![Animación de Scroll - Google Chrome - 14 June 2025](https://github.com/user-attachments/assets/e038b369-819b-4e0d-87b4-7cfcd3fc602e)
