@@ -44,14 +44,12 @@
 
         gsap.registerPlugin(ScrollTrigger);
 
-        //animacion de entrada
         gsap.from(".title", {
             y: 80,
             duration: 1,
             ease: "power2.out"
         });
 
-        //animacion de scroll letras
         gsap.to(".title", {
             scale: 1.5,
             autoAlpha: 0,
@@ -74,19 +72,20 @@
         canvas.width = 1068;
         canvas.height = 600;
 
-        const TOTAL_FRAMES = 48;
+        const TOTAL_FRAMES_1 = 48;
+        const createImageSet1 = (index) => `/framewebp/scene${index.toString().padStart(5, 0)}.webp`;
 
-        const createImage = (index) => {
-            return `/framewebp/scene${index.toString().padStart(5, 0)}.webp`;
-        };
-        const images = Array.from({ length: TOTAL_FRAMES }, (_, i) => {
+        const TOTAL_FRAMES_2 = 30;
+        const createImageSet2 = (index) => `/frames/scene${index.toString().padStart(5, 0)}.webp`;
+
+        let TOTAL_FRAMES = TOTAL_FRAMES_1;
+        let createImage = createImageSet1;
+        let images = Array.from({ length: TOTAL_FRAMES }, (_, i) => {
             const img = new Image();
             img.src = createImage(i + 1);
             return img;
         });
-        const micaela = {
-            frame: 0
-        };
+        const micaela = { frame: 0 };
 
         //animacion de scroll imagen
         gsap.to(micaela, {
@@ -99,6 +98,51 @@
             onUpdate: render
 
         });
+        let isSecondSet = false;
+
+
+        function switchImageSet() {
+            isSecondSet = !isSecondSet;
+
+            if (isSecondSet) {
+                // Segundo conjunto
+                TOTAL_FRAMES = TOTAL_FRAMES_2;
+                createImage = createImageSet2;
+                canvas.className = "hero w-[200vw] lg:w-[83vw] max-w-[1920px] aspect-[1920/1003] h-auto";
+
+                canvas.width = 1920;
+                canvas.height = 1003;
+            } else {
+                // Primer conjunto
+                TOTAL_FRAMES = TOTAL_FRAMES_1;
+                createImage = createImageSet1;
+                canvas.className = "hero w-[90vw] max-w-[1068px] aspect-[1068/600] h-auto";
+
+                canvas.width = 1068;
+                canvas.height = 600;
+            }
+
+            images = Array.from({ length: TOTAL_FRAMES }, (_, i) => {
+                const img = new Image();
+                img.src = createImage(i + 1);
+                return img;
+            });
+            micaela.frame = 0;
+
+            gsap.killTweensOf(micaela);
+
+            gsap.to(micaela, {
+                frame: TOTAL_FRAMES - 1,
+                ease: "none",
+                snap: "frame",
+                scrollTrigger: {
+                    scrub: 0.5,
+                },
+                onUpdate: render
+            });
+            images[0].onload = () => render();
+        }
+        setInterval(switchImageSet, 8000);
 
         images[0].onload = () => render();
         function render() {
@@ -117,7 +161,19 @@
                 ctx.globalCompositeOperation = 'destination-in';
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+                if (isSecondSet) {
+                    // Máscara radial centrada, transparente en bordes
+                    const radius = Math.min(canvas.width, canvas.height) * 0.95;
+                    const gradient = ctx.createRadialGradient(
+                        canvas.width / 2, canvas.height / 2, radius * 0.7,
+                        canvas.width / 2, canvas.height / 2, radius
+                    );
+                    gradient.addColorStop(0, 'rgba(0,0,0,1)');
+                    gradient.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.globalCompositeOperation = 'destination-in';
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
                 ctx.restore();
                 ctx.globalCompositeOperation = 'source-over';
             }
